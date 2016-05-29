@@ -11,6 +11,7 @@ The aim of this project is to automatically generate transformation rules, which
 - [Future work](#future-work)
 - [Weblinks](#weblinks)
 
+
 ## Project description
 
 [APIEvolutionMiner] is an existing tool that mines a project history to detect API changes. This tool is also capable of producing static analyzer rules that detect an old API usage in source code.
@@ -33,72 +34,97 @@ However, there is a limitation if the number of arguments doesn't match. In this
 The resulting Smalltalk package file (`AEMTransformRules.st`) can be filed-in into your Pharo VM. Then, you can open the built-in _Critic Browser_ for viewing the API changes. Below you can find an example of viewing the rules for [Roassal2](http://www.smalltalkhub.com/#!/~ObjectProfile/Roassal2) within _Critic Browser_:
 ![Critic browser](./images/critic_browser_roassal2.png?raw=true)
 
+
 ## How to setup
 
 #### Automatic/script setup
 
 1. Clone this repository into your preferred directory.
+
 2. Run the script `Get-AEMRules.sh` with any SmalltalkHub repository as argument (replace the link of GraphET2 with our desired project): 
+
     ```shell
     $ ./Get-AEMRules.sh http://www.smalltalkhub.com/mc/ObjectProfile/GraphET2/main
     ```
+
     ![Console output](./images/console_output.png?raw=true)
+
 3. The script will generate all the files in the following directory: `~/AEMTransformRules/AEMRules-{your_project_name}`
 
 #### Manual setup
 
 1. Create a new folder for the APIEvolutionMiner and project files.
+
 2. Download the APIEvolutionMiner-Jet Pharo image from here: https://ci.inria.fr/rmod/view/MinedRules/job/APIEvolutionMiner-Jet/lastSuccessfulBuild/artifact/APIEvolutionMiner-Jet.zip
+
     ```shell
     curl --silent --insecure -o APIEvolutionMiner-Jet.zip https://ci.inria.fr/rmod/view/MinedRules/job/APIEvolutionMiner-Jet/lastSuccessfulBuild/artifact/APIEvolutionMiner-Jet.zip
     unzip -o APIEvolutionMiner-Jet.zip
     ```
+
 3. Download latest Pharo VM here: http://get.pharo.org/vm or just use your existing Pharo VM (be aware, the APIEvolutionMiner needs the PharoV20.sources).
+
     ```shell
     curl --silent get.pharo.org/vm | bash
     ```
+
 4. Create the following sub-folders and files:
+
     ```shell
     mkdir latestMczFiles
     mkdir latestSourceCodeChanges
     touch ourMczFiles
     ```
+
 5. Open the Pharo-UI with the `APIEvolutionMiner-Jet.image` and download the latest MCZ-files for your desired SmalltalkHub project (replace the links and names of GraphET2 with our desired project). This step should write into the previously created file `ourMczFiles` and folder `latestMczFiles`. Attention: For a large project, this step can take a long time and downloads several MBs data.
+
     ```smalltalk
     AEMRepositoryDownloader downloaLatestMczsFor: 'http://www.smalltalkhub.com/mc/ObjectProfile/GraphET2/main'.
     ```
+
 6. Now import the ring history. This will close the UI, but it's okay. This step should generate the file `latestDataset` and write into the previously created folder `latestSourceCodeChanges`. Depending on the size of the project, this step needs more than the usual memory size. If it crashes due to memory, just add the following line to the VM `Pharo.ini`: `AddressSpaceLimit=1536` (update the number of memory according to your project).
+
     ```smalltalk
     AEMRepositoryDownloader importToRingHistoryAndExportAssociations.
     ```
+
 7. Copy the file `latestDataset` and rename the copy to `dataset`:
+
     ```shell
     cp -u latestDataset dataset
     ```
+
 8. Copy the folder `latestSourceCodeChanges` and rename the copy to `sourceCodeChanges`:
+
     ```shell
     mkdir sourceCodeChanges
     cp -r latestSourceCodeChanges/* sourceCodeChanges
     ```
+
 9. Open the Pharo-UI with the `APIEvolutionMiner-Jet.image` again and file-in the following file:
     - [AEMTransformRulesGenerator.st](./src/AEMTransformRulesGenerator.st?raw=true)
-9.  Then execute the following code within the Workspace:
+10.  Then execute the following code within the Workspace:
+
     ```smalltalk
     AEMSystemHistoryImporter loadSystemHistory: 'GraphET2'.
     AEMTransformRulesGenerator new generateRBTransformationRules: ((AEMEvidenceRanking new systemHistory: ((AEMReport exportOneOneRules) systemHistory)) oneOneRules).
     (RPackageOrganizer default packageNamed: #AEMTransformRules) fileOut.
     ```
-10. The code above should have created the following files in your directory:
+
+11. The code above should have created the following files in your directory:
     - rules.csv (containing the APIEvolutionMiner rules)
     - AEMTransformRules.st (containing the RBTransformationRules, which can be directly used with Critic-Browser)
-11. Finally the folder structure should look like this:
+
+12. Finally the folder structure should look like this:
     ![Folder structure](./images/folder_structure.png?raw=true)
-  
+
+
 ## Future work
 
 - Integrate the code into a CI service
 - Debug the command `AEMRepositoryDownloader importToRingHistoryAndExportAssociations.` since it crashes very often (especially for bigger projects/APIs)
 - Update AEM in order to run at least on Pharo 4 (currently it needs still Pharo 2)
+
 
 ## Weblinks
 
