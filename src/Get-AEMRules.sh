@@ -2,7 +2,7 @@
 
 cwd=$(pwd)
 
-cd ~/Development
+cd ~
 if [ ! -d "AEMTransformRules" ]; then
 	mkdir AEMTransformRules
 fi

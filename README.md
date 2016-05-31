@@ -8,6 +8,7 @@ The aim of this project is to automatically generate transformation rules, which
 - [How to setup](#how-to-setup)
     - [Automatic/script setup](#automaticscript-setup)
     - [Manual setup](#manual-setup)
+- [Possible errors](#possible-errors)
 - [Future work](#future-work)
 - [Weblinks](#weblinks)
 
@@ -117,6 +118,17 @@ The resulting Smalltalk package file (`AEMTransformRules.st`) can be filed-in in
 
 12. Finally the folder structure should look like this:
     ![Folder structure](./images/folder_structure.png?raw=true)
+
+
+## Possible errors
+
+- PharoDebug.log: `Error: can't find EOCD position`
+    - Solution:
+        1. Go into folder `latestMczFiles`
+        2. Sort _.mcz_ (actually ZIP archives) by file-size
+        3. Delete (remember the names) all files with file-size of 0 or 1 KB (corrupted, you can try to open them with your ZIP application to test them)
+        4. Go back to one folder above. Remove the deleted packages from the list in file `ourMczFiles`.
+        5. Finally, just run the Bash script with the same repository as input again.
 
 
 ## Future work
